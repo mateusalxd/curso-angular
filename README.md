@@ -6,7 +6,7 @@
 
 ```html
 <!-- {{ }} possibilita a construção de angular expression, utilizar para preencher conteúdo de tags html -->
-<!-- titulo um é dado que vem do componente -->
+<!-- titulo é um dado que vem do componente -->
 <h1>Bem Vindo ao {{ titulo }}</h1>
 ```
 
@@ -22,4 +22,30 @@ export class AppComponent {
 ```html
 <!-- url e description são as propriedades do componente exibido acima -->
 <img [src]="url" [alt]="description">
+```
+
+- para um componente receber dados para seus atributos, *inbound properties*, é necessário utilizar o *decorator* `@Input()`
+
+```javascript
+@Component({
+    selector: 'app-photo',
+    templateUrl: './photo.component.html'
+})
+export class PhotoComponent {
+    @Input() url: string;
+    @Input() description: string;
+}
+```
+
+```html
+<app-photo url="https://upload.wikimedia.org/wikipedia/commons/f/f6/Old_violin.jpg" description="Violino"></app-photo>
+```
+
+- para criar componentes utilizando uma lista como base, existe a diretiva `ngFor`
+
+```html
+<!-- photos é uma propriedade do componente -->
+<!-- a cada iteração, photo receberá um item da lista de photos -->
+<!-- necessário utilizar o [ ] para realizar o data binding -->
+<app-photo *ngFor="let photo of photos" [url]="photo.url" [description]="photo.description"></app-photo>
 ```
