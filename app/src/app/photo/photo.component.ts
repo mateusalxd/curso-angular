@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
     selector: 'app-photo',
     templateUrl: './photo.component.html'
 })
 export class PhotoComponent {
-    url = 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Old_violin.jpg';
-    description = 'Violino';
+    @Input() url: string;
+    @Input() description: string;
 }
