@@ -67,3 +67,47 @@ export class PhotoComponent {
 @Injectable({ providedIn: 'root' })
 export class PhotoService { }
 ```
+
+- para que um módulo que não é o principal consiga utilizar as diretivas do Angular, é necessário importar `CommonModule` no mesmo, no módulo principal é importado o `BrowserModule`, este não deve ser importados em outros módulos
+```typescript
+@NgModule({
+    declarations: [PhotoComponent, PhotoListComponent],
+    imports: [HttpClientModule, CommonModule]
+})
+export class PhotosModule { }
+```
+
+- o módulo de rotas permite a utilização de parâmetros no path
+```typescript
+// ao configurar a rota user/:userName, o :userName indica a existência
+// de um parâmetro, que posteriormente poderá ser utilizado no componente
+const routes: Routes = [
+  { path: 'user/:userName', component: PhotoListComponent },
+  { path: 'p/add', component: PhotoFormComponent }
+];
+
+...
+
+// o componente recupera o parâmetro utilizando o ActivatedRoute
+// que é injetado no construtor e demonstrado no ngOnInit
+  constructor(private photoService: PhotoService,
+    private activatedRoute: ActivatedRoute) { }
+
+  ngOnInit(): void {
+
+    const userName = this.activatedRoute.snapshot.params.userName;
+
+    this.photoService
+      .listFromUser(userName)
+      .subscribe(photos => this.photos = photos);
+  }
+```
+
+- para identificar rotas inválidas pode ser utilizado o path `**`
+```typescript
+const routes: Routes = [
+  { path: 'user/:userName', component: PhotoListComponent },
+  { path: 'p/add', component: PhotoFormComponent },
+  { path: '**', component: NotFoundComponent },
+];
+```
