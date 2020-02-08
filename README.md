@@ -10,9 +10,9 @@
 <h1>Bem Vindo ao {{ titulo }}</h1>
 ```
 
-- pode ser utilizado `[ ]` para fazer o *one way data binding*, do componente para o template, de um atributo de uma tag html com uma propriedade do compomente
+- pode ser utilizado `[ ]` para fazer o *one way data binding*, do componente para o template, de um atributo de uma tag html com uma propriedade do componente
 
-```javascript
+```typescript
 export class AppComponent {
     url = 'https://upload.wikimedia.org/wikipedia/commons/f/f6/Old_violin.jpg';
     description = 'Violino';
@@ -26,7 +26,7 @@ export class AppComponent {
 
 - para um componente receber dados para seus atributos, *inbound properties*, é necessário utilizar o *decorator* `@Input()`
 
-```javascript
+```typescript
 @Component({
     selector: 'app-photo',
     templateUrl: './photo.component.html'
@@ -48,4 +48,22 @@ export class PhotoComponent {
 <!-- a cada iteração, photo receberá um item da lista de photos -->
 <!-- necessário utilizar o [ ] para realizar o data binding -->
 <app-photo *ngFor="let photo of photos" [url]="photo.url" [description]="photo.description"></app-photo>
+```
+
+- é possível realizar injeção de dependências através do construtor
+```typescript
+    // injeta o HttpClient na construção do componente
+    // para esse caso foi necessário um provider na importação
+    // dos módulo, que é o HttpClientModule
+    constructor(http: HttpClient) {
+
+    }
+```
+
+- para permitir que um componente possa ser injetado é necessário utilizar um *decorator*
+```typescript
+// para garantir que será utilizado somente um componente para
+// toda a aplicação, utiliza-se providedIn como root
+@Injectable({ providedIn: 'root' })
+export class PhotoService { }
 ```
