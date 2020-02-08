@@ -111,3 +111,65 @@ const routes: Routes = [
   { path: '**', component: NotFoundComponent },
 ];
 ```
+
+- é possível identificar mudanças nas *inbound properties* através da interface `OnChanges`
+```typescript
+export class PhotosComponent implements OnChanges {
+
+    @Input() photos: Photo[] = [];
+    rows: any[] = [];
+
+    constructor() { }
+
+    // na variável changes é possível verificar a inbound property desejada
+    ngOnChanges(changes: SimpleChanges) {
+        if(changes.photos)
+            this.rows = this.groupColumns(this.photos);
+    }
+
+    groupColumns(photos: Photo[]) { ... }
+}
+```
+
+- pode ser utilizado `( )` para fazer o *one way event binding*, do template para o componente, de um evento JavaScript do template para um método ou atributo do componente
+```html
+<!-- keyup é o evento, filter é um atributo do componente e $event é a variável relacionada ao evento -->
+<div class="text-center mt-3 mb-3">
+    <form>
+        <input
+            class="rounded"
+            type="search"
+            placeholder="search..."
+            autofocus
+            (keyup)="filter = $event.target.value"
+            >
+    </form>
+</div>
+```
+
+- para realizar transformações com o Angular, existem *pipes* prontos que fazem isso, por exemplo `CurrencyPipe` para formatação de moeda, `PercentPipe` para formatação de porcentagem entres outro
+```html
+<!-- após o | é informado o nome do pipe, em seguida são informados os parâmetros, se existirem -->
+<p>A: {{a | currency:'BRL'}}</p>
+<!-- saída A: R$ 50,55, considerando que 'a' vale 50.55 -->
+```
+
+- é possível criar um *pipe* personalizado usando a diretira `@Pipe` e implementando a interface `PipeTransform`
+```typescript
+@Pipe({
+  name: 'filterByDescription'
+})
+export class FilterByDescriptionPipe implements PipeTransform {
+
+  transform(photos: Photo[], descriptionQuery: string): any {
+    ...
+  }
+
+}
+```
+
+- a diretiva `*ngIf` possibilita que seja avaliada uma expressão, dependendo o resultado da expressão uma tag html pode ser exibida ou não
+```html
+<!-- só irá exibir o parágrafo se não existir nenhuma foto -->
+<p *ngIf="!photos.length" class="text-center text-muted">Nenhuma foto encontrada</p>
+```
