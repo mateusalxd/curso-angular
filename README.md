@@ -173,3 +173,107 @@ export class FilterByDescriptionPipe implements PipeTransform {
 <!-- só irá exibir o parágrafo se não existir nenhuma foto -->
 <p *ngIf="!photos.length" class="text-center text-muted">Nenhuma foto encontrada</p>
 ```
+
+- quando dependemos do retorno de dados de uma API, pode acontecer de aparecerem informações da página que não deveriam aparecer, por exemplo, a mensagem "Nenhuma foto encontrada" assim que carregamos a página, porém ele some alguns milésimos de segundos após a API retornar as fotos, para evitar isso, é possível utilizar um `Resolve`, que irá recuperar as informações da API antes de carregar a página.
+```typescript
+...
+
+@Injectable({ providedIn: 'root' })
+// o Resolve deve ser do tipo do retorno da API, neste caso
+// é um Observable<Photo[]>
+export class PhotoListResolve implements Resolve<Observable<Photo[]>> {
+
+    constructor(private service: PhotoService) { }
+
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Photo[]> {
+        const userName = route.params.userName;
+        return this.service.listFromUser(userName);
+    }
+
+}
+
+// para utilizar o Resolve, vinculamos ele a rota desejada, para este caso
+// utilizamos "photos" para armezanar o resultado do Resolve, que posteriormente
+// poderá ser recuperado no componente
+const routes: Routes = [
+  { path: 'user/:userName', component: PhotoListComponent, resolve: { photos: PhotoListResolve } },
+  { path: 'p/add', component: PhotoFormComponent },
+  { path: '**', component: NotFoundComponent },
+];
+
+
+export class PhotoListComponent implements OnInit {
+  ...
+  constructor(private activatedRoute: ActivatedRoute) { }
+
+  ngOnInit(): void {
+    // recuperando os dados do Resolve
+    this.photos = this.activatedRoute.snapshot.data['photos'];
+  }
+
+}
+```
+
+- para evitar chamadas desnecessárias de uma API que é utilizada em eventos de pressionamente de teclas, por exemplo, podemos utilizar `Subject` combinado com `debounceTime`
+
+```typescript
+  ...
+  // criamos o Subject que possibilitará que possamos
+  // emitir e receber informações
+  debounce: Subject<string> = new Subject<string>();
+
+  ngOnInit(): void {
+    // o debounceTime define que iremos receber a última informação após
+    // 300 milésimos de segundos sem nenhuma outra emissão
+    this.debounce.pipe(debounceTime(300)).subscribe(filter => this.filter = filter);
+  }
+
+  ngOnDestroy(): void {
+    // é necessário desinscrever para indicar que não iremos mais
+    // receber informações, isso irá evitar problemas de memória
+    this.debounce.unsubscribe();
+  }
+```
+
+```html
+  <input
+      class="rounded"
+      type="search"
+      placeholder="search..."
+      autofocus
+      (keyup)="this.debounce.next($event.target.value)" 
+      >
+      <!-- utilizamos next para emitir um novo valor para quem estiver
+      inscrito no Subject, isso acontecerá a cada tecla pressionara -->
+```
+
+- é possível utilizar `else` com um `*ngIf` através de templates
+```html
+<!-- hasMore é um propriedade do componente, casa ela seja avaliada como true, 
+então é exibida a div e button, caso contrário é exibido o que está no 
+template messageTemplate -->
+<div class="text-center" *ngIf="hasMore; else messageTemplate">
+    <button class="btn btn-primary">Carregar mais</button>
+</div>
+
+<!-- utiliza-se # para definir o nome do template -->
+<ng-template #messageTemplate>
+    <p class="text-center text-muted">Sem dados para carregar</p>
+</ng-template>
+```
+
+- as propriedades dos componentes, quando atualizadas, podem manter as mesmas referências dependendo da maneira como são atualizadas, isso deve ser observado e arrumado
+```typescript
+  load() {
+    this.photoService
+      .listFromUserPaginated(this.userName, ++this.currentPage)
+      .subscribe(photos => {
+        // this.photos é uma propriedade do componente,
+        // para que as tags HTML sejam atualizadas corretamente
+        // é necessário mudar sua referência, uma das maneiras
+        // de se fazer isso é utilizando o concat
+        this.photos = this.photos.concat(photos);
+        if (!photos.length) this.hasMore = false;
+      });
+  }
+```
