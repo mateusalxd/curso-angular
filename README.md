@@ -28,7 +28,7 @@ export class AppComponent {
 
 ```typescript
 @Component({
-    selector: 'app-photo',
+    selector: 'ap-photo',
     templateUrl: './photo.component.html'
 })
 export class PhotoComponent {
@@ -38,7 +38,7 @@ export class PhotoComponent {
 ```
 
 ```html
-<app-photo url="https://upload.wikimedia.org/wikipedia/commons/f/f6/Old_violin.jpg" description="Violino"></app-photo>
+<ap-photo url="https://upload.wikimedia.org/wikipedia/commons/f/f6/Old_violin.jpg" description="Violino"></ap-photo>
 ```
 
 - para criar componentes utilizando uma lista como base, existe a diretiva `ngFor`
@@ -47,7 +47,7 @@ export class PhotoComponent {
 <!-- photos é uma propriedade do componente -->
 <!-- a cada iteração, photo receberá um item da lista de photos -->
 <!-- necessário utilizar o [ ] para realizar o data binding -->
-<app-photo *ngFor="let photo of photos" [url]="photo.url" [description]="photo.description"></app-photo>
+<ap-photo *ngFor="let photo of photos" [url]="photo.url" [description]="photo.description"></ap-photo>
 ```
 
 - é possível realizar injeção de dependências através do construtor
