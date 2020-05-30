@@ -277,3 +277,126 @@ template messageTemplate -->
       });
   }
 ```
+
+- para colocar um conteúdo dentro de tags dos componentes criados, utilizamos `ng-content`
+```typescript
+@Component({
+  selector: 'ap-card',
+  templateUrl: './card.component.html',
+  styleUrls: ['./card.component.scss']
+})
+export class CardComponent {
+
+  @Input() titulo: string;
+
+}
+```
+
+```html
+<!-- o template de ap-card -->
+<div class="card border-light text-center">
+    <h4 class="card-header">{{titulo}}</h4>
+    <div class="card-block text-center">
+        <ng-content></ng-content>
+    </div>
+</div>
+
+<!-- utilização -->
+<ap-card [titulo]="photo.description">
+    <!-- todo o conteúdo dentro da tag ap-card será colocado no lugar da tag ng-content do template -->
+    <ap-photo 
+        [url]="photo.url" 
+        [description]="photo.description">
+    </ap-photo>
+    <div class="text-center p-1">
+        <i aria-hidden="true" class="fa fa-heart-o fa-1x mr-2"></i>{{ photo.likes }}
+        <i aria-hidden="true" class="fa fa-comment-o fa-1x mr-2 ml-2"></i>{{ photo.comments }}
+    </div>
+</ap-card>
+```
+
+- é possível realizar a comunicação entre componentes pai e filho usando a propriedade `@Output()` e `EventEmitter`
+```typescript
+@Component({
+  selector: 'ap-search',
+  ...
+})
+export class SearchComponent implements OnInit, OnDestroy {
+
+  debounce: Subject<string> = new Subject<string>();
+  // declaremos a propriedade onTyping, esse nome
+  // deverá ser o nome do evento utilizado no
+  // componente pai
+  @Output() onTyping = new EventEmitter<string>();
+
+  constructor() { }
+
+  ngOnInit() {
+    this.debounce.pipe(debounceTime(300)).subscribe(filter => {
+      // emitimos o valor digitado através do onTyping,
+      // essa informação poderá ser recuperada pelo componente pai
+      // através de $event
+      this.onTyping.emit(filter)
+    });
+  }
+  ...
+}
+```
+
+```html
+<!-- 
+  onTyping é o nome da Output property criada no componente filho, 
+  utilizamos entre parenteses por ser um evento.
+  filter é uma propriedade do componente pai que é populada com o
+  resultado do evento onTyping, através do conteúdo de $event
+-->
+<ap-search (onTyping)="filter = $event"></ap-search>
+```
+
+- para colocar comportamentos ou alterar elementos de maneira genérica, podemos utilizar diretivas
+```typescript
+@Directive({
+  // o selector deve ser informado entre colchetes
+  selector: '[apDarkenOnHover]'
+})
+export class DarkenOnHoverDirective {
+
+  // assim como em componentes, podemos ter propriedades na diretiva
+  @Input() brightness = '70%';
+
+  constructor(
+    // ElementRef é uma representação do elemento do DOM
+    private el: ElementRef,
+    // Renderer pode ser utilizado para evitar problemas
+    // na renderização de elementos no backend (SSR)
+    private render: Renderer
+  ) { }
+
+  // HostListener irá escutar o evento no elemento no qual 
+  // a diretiva está atribuída
+  @HostListener('mouseover')
+  darkenOn() {
+    // através do Renderer atualizamos o estilo do elemento do DOM
+    // this.el.nativeElement é o elemento do DOM
+    // filter é a propriedade CSS
+    // brightness é o valor
+    this.render.setElementStyle(this.el.nativeElement, 'filter', `brightness(${this.brightness})`);
+  }
+  @HostListener('mouseleave')
+  darkenOff() {
+    this.render.setElementStyle(this.el.nativeElement, 'filter', 'brightness(100%)');
+  }
+
+}
+```
+
+```html
+<ol class="list-unstyled">
+    <li *ngFor="let cols of rows" class="row no-gutters">
+        <!-- utilização da diretiva com a sua propriedade -->
+        <div *ngFor="let photo of cols" class="col-4" apDarkenOnHover brightness="70%">
+          ...
+        </div>
+    </li>
+</ol>
+```
