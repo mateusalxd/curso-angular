@@ -5,6 +5,7 @@ import { PhotosComponent } from './photos/photos.component';
 import { FilterByDescriptionPipe } from './filter-by-description.pipe';
 import { PhotoListComponent } from './photo-list.component';
 import { PhotoModule } from '../photo/photo.module';
+import { CardModule } from '../../shared/components/card/card.module';
 
 
 
@@ -12,7 +13,8 @@ import { PhotoModule } from '../photo/photo.module';
   declarations: [LoadButtonComponent, PhotosComponent, FilterByDescriptionPipe, PhotoListComponent],
   imports: [
     CommonModule,
-    PhotoModule
+    PhotoModule,
+    CardModule
   ]
 })
 export class PhotoListModule { }
